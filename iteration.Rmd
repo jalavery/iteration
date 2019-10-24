@@ -1,0 +1,92 @@
+---
+title: "Iteration"
+author: "Jessica Lavery"
+date: "10/24/2019"
+output: github_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rvest)
+```
+
+# First function
+```{r}
+
+x = rnorm(25, mean = 5, sd = 3)
+x_again = rnorm(25, mean = 6, sd = 0.3)
+y <- rnorm(25, mean = 4, sd = 0.13)
+
+# compute z-score
+mean_and_sd <- function(input_x) {
+  if (!is.numeric(input_x)) {
+    stop("x should be numeric")
+  } else if (length(input_x) < 3) {
+    stop("Cannot be computed on vectors of length <3")
+  }
+  
+  # option 1 for output: tibble
+  # tibble(mean_input = mean(input_x), 
+  #        sd_input = sd(input_x))
+  
+  # option 2 for ouptut: list
+  list(mean_input = mean(input_x), 
+         sd_input = sd(input_x))
+}
+
+mean_and_sd(x)
+
+mean_and_sd(y)
+```
+
+## Multiple inputs
+```{r}
+sim_regression <- function(n, beta0, beta1){
+  sim_data = tibble(
+    x = rnorm(n, mean = 1, sd = 1),
+    y = beta0 + beta1 * x + rnorm(n, 0, 1))
+  
+  ls_fit = lm(y ~ x, data = sim_data)
+
+  beta0_hat = coef(ls_fit)[1]
+  beta1_hat = coef(ls_fit)[2]
+}
+
+sim_regression(n = 300, beta0 = 17, beta1 = -3)
+```
+
+## Amazon reviews as a function
+```{r}
+read_page_reviews <- function(url) {
+  
+  h = read_html(url)
+  
+  review_titles = h %>%
+    html_nodes("#cm_cr-review_list .review-title") %>%
+    html_text()
+  
+  review_stars = h %>%
+    html_nodes("#cm_cr-review_list .review-rating") %>%
+    html_text() %>%
+    str_extract("\\d") %>%
+    as.numeric()
+  
+  review_text = h %>%
+    html_nodes(".review-data:nth-child(4)") %>%
+    html_text()
+  
+  tibble(
+    title = review_titles,
+    stars = review_stars,
+    text = review_text
+  )
+}
+```
+
+
+
+
