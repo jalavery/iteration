@@ -72,4 +72,9 @@ sim_results %>%
   geom_point()
 ```
 
+## Iterate over input and output
+
+```{r}
+
+```
 
