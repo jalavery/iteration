@@ -1,0 +1,75 @@
+---
+title: "Simulations"
+author: "Jessica Lavery"
+date: "10/31/2019"
+output: github_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+set.seed(1123)
+```
+
+## Simulate data
+
+```{r}
+sim_regression = function(n, beta0 = 2, beta1 = 3) {
+  
+  sim_data = tibble(
+    x = rnorm(n, mean = 1, sd = 1),
+    y = beta0 + beta1 * x + rnorm(n, 0, 1)
+  )
+  
+  ls_fit = lm(y ~ x, data = sim_data)
+  
+  tibble(
+    beta0_hat = coef(ls_fit)[1],
+    beta1_hat = coef(ls_fit)[2]
+  )
+}
+
+sim_regression(n = 30)
+```
+
+## Run simulation via for loop
+
+```{r}
+output = vector("list", 5000)
+
+for (i in 1:5000) {
+  output[[i]] = sim_regression(30)
+}
+
+sim_results = bind_rows(output)
+
+sim_results %>% 
+  ggplot(aes(x = beta0_hat, y = beta1_hat)) + 
+  geom_point()
+
+sim_results %>% 
+  ggplot(aes(x = beta0_hat)) +
+  geom_density()
+
+sim_results %>% 
+  ggplot(aes(x = beta1_hat)) +
+  geom_density()
+```
+
+```{r}
+# rerun function, like map, by default will return a list, use bind rows to get a data frame
+sim_results = 
+  rerun(1000, sim_regression(30, 2, 3)) %>% 
+  bind_rows()
+
+#b0 and b1 are correlated
+sim_results %>% 
+  ggplot(aes(x = beta0_hat, y = beta1_hat, alpha = 0.5)) + 
+  geom_point()
+```
+
+
